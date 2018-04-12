@@ -6,12 +6,17 @@ var randomBytes = require('react-native-randombytes').randomBytes
 
 var DEFAULT_WORDLIST = require('./wordlists/en.json')
 
-async function mnemonicToSeed(mnemonic, password) {
-  return Aes.pbkdf2(mnemonic, salt(password))
+function mnemonicToSeed(mnemonic) {
+  var salt = CryptoJS.lib.WordArray.random(128 / 8)
+  var key256Bits = CryptoJS.PBKDF2(mnemonic, salt, {
+    keySize: 256 / 32,
+    iterations: 1000
+  })
+  return key256Bits
 }
 
-async function mnemonicToSeedHex(mnemonic, password) {
-  var seed = await mnemonicToSeed(mnemonic, password)
+function mnemonicToSeedHex(mnemonic, password) {
+  var seed = mnemonicToSeed(mnemonic, password)
   return seed.toString('hex')
 }
 
@@ -28,10 +33,12 @@ function mnemonicToEntropy(mnemonic, wordlist) {
   assert(belongToList, 'Invalid mnemonic')
 
   // convert word indices to 11 bit binary strings
-  var bits = words.map(function(word) {
-    var index = wordlist.indexOf(word)
-    return lpad(index.toString(2), '0', 11)
-  }).join('')
+  var bits = words
+    .map(function(word) {
+      var index = wordlist.indexOf(word)
+      return lpad(index.toString(2), '0', 11)
+    })
+    .join('')
 
   // split the binary string into ENT/CS
   var dividerIndex = Math.floor(bits.length / 33) * 32
@@ -95,7 +102,9 @@ function validateMnemonic(mnemonic, wordlist) {
 }
 
 function checksumBits(entropyBuffer) {
-  var hash = createHash('sha256').update(entropyBuffer).digest()
+  var hash = createHash('sha256')
+    .update(entropyBuffer)
+    .digest()
 
   // Calculated constants from BIP39
   var ENT = entropyBuffer.length * 8
@@ -111,14 +120,16 @@ function salt(password) {
 //=========== helper methods from bitcoinjs-lib ========
 
 function bytesToBinary(bytes) {
-  return bytes.map(function(x) {
-    return lpad(x.toString(2), '0', 8)
-  }).join('');
+  return bytes
+    .map(function(x) {
+      return lpad(x.toString(2), '0', 8)
+    })
+    .join('')
 }
 
 function lpad(str, padString, length) {
-  while (str.length < length) str = padString + str;
-  return str;
+  while (str.length < length) str = padString + str
+  return str
 }
 
 module.exports = {
