@@ -3,6 +3,7 @@ var assert = require('assert')
 var pbkdf2 = require('react-native-crypto').pbkdf2Sync
 var createHash = require('react-native-crypto').createHash
 var randomBytes = require('react-native-randombytes').randomBytes
+var CryptoJS = require('crypto-js')
 
 var DEFAULT_WORDLIST = require('./wordlists/en.json')
 
