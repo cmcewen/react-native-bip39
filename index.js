@@ -1,7 +1,7 @@
 var unorm = require('unorm')
 var assert = require('assert')
 var createHash = require('create-hash')
-var randomBytes = require('react-native-randombytes').randomBytes
+var randomBytes = require('react-native-secure-randombytes').randomBytes
 var CryptoJS = require('crypto-js')
 
 var DEFAULT_WORDLIST = require('./wordlists/en.json')
